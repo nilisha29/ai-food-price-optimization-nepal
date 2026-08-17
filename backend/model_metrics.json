@@ -1,0 +1,173 @@
+{
+  "mae": 9.35,
+  "rmse": 21.29,
+  "r2": 0.9763,
+  "mape": 6.64,
+  "accuracy": 93.36,
+  "train_rows": 45483,
+  "test_rows": 32263,
+  "features": [
+    "year",
+    "month",
+    "quarter",
+    "week_of_year",
+    "day_of_year",
+    "month_sin",
+    "month_cos",
+    "price_lag_1m",
+    "price_lag_3m",
+    "price_lag_6m",
+    "price_lag_12m",
+    "rolling_mean_3m",
+    "rolling_mean_6m",
+    "rolling_mean_12m",
+    "rolling_std_3m",
+    "rolling_std_6m",
+    "price_change_1m",
+    "price_change_pct",
+    "price_vs_3m_avg",
+    "price_vs_12m_avg",
+    "is_dashain_season",
+    "is_tihar_season",
+    "is_teej_season",
+    "is_chhath_season",
+    "is_new_year_season",
+    "is_any_festival",
+    "months_to_dashain",
+    "is_kathmandu_valley",
+    "province_code",
+    "commodity_code",
+    "category_code",
+    "food_cpi",
+    "nrb_food_cpi_change",
+    "cpi_3m_change"
+  ],
+  "per_commodity": [
+    {
+      "commodity": "Apples",
+      "mape": 11.81405559277762,
+      "mae": 24.21021486722506,
+      "rows": 1625
+    },
+    {
+      "commodity": "Bananas",
+      "mape": 6.391431466151111,
+      "mae": 7.966286078930208,
+      "rows": 1553
+    },
+    {
+      "commodity": "Beans (black)",
+      "mape": 3.5813481763871495,
+      "mae": 7.397299508901742,
+      "rows": 1625
+    },
+    {
+      "commodity": "Cabbage",
+      "mape": 15.876341156920418,
+      "mae": 6.8996295022397875,
+      "rows": 1599
+    },
+    {
+      "commodity": "Carrots",
+      "mape": 14.249984838873441,
+      "mae": 11.613157880117544,
+      "rows": 1453
+    },
+    {
+      "commodity": "Chickpeas",
+      "mape": 3.3808269563545124,
+      "mae": 4.9331065417077875,
+      "rows": 1607
+    },
+    {
+      "commodity": "Eggs",
+      "mape": 5.540058046191726,
+      "mae": 1.0679700799597198,
+      "rows": 1582
+    },
+    {
+      "commodity": "Fish",
+      "mape": 5.810159011400216,
+      "mae": 28.705534993071637,
+      "rows": 1363
+    },
+    {
+      "commodity": "Lentils (broken)",
+      "mape": 2.6676977685755574,
+      "mae": 4.650842430119453,
+      "rows": 1621
+    },
+    {
+      "commodity": "Meat (chicken)",
+      "mape": 3.967153448011808,
+      "mae": 18.505571705573384,
+      "rows": 1609
+    },
+    {
+      "commodity": "Milk",
+      "mape": 2.2797263165457666,
+      "mae": 2.545830002956623,
+      "rows": 1559
+    },
+    {
+      "commodity": "Oil (mustard)",
+      "mape": 4.098488989867041,
+      "mae": 11.169243197135737,
+      "rows": 1624
+    },
+    {
+      "commodity": "Oil (soybean)",
+      "mape": 3.545823156028775,
+      "mae": 8.357181133563701,
+      "rows": 1625
+    },
+    {
+      "commodity": "Oranges",
+      "mape": 9.871823016194806,
+      "mae": 15.930524259192921,
+      "rows": 1070
+    },
+    {
+      "commodity": "Peanut",
+      "mape": 6.133695700606439,
+      "mae": 21.693214923210864,
+      "rows": 1325
+    },
+    {
+      "commodity": "Potatoes (red)",
+      "mape": 8.238558451212052,
+      "mae": 3.887963870252461,
+      "rows": 1618
+    },
+    {
+      "commodity": "Pumpkin",
+      "mape": 8.496125061186484,
+      "mae": 5.156949480918989,
+      "rows": 1460
+    },
+    {
+      "commodity": "Rice (coarse)",
+      "mape": 2.8916243526192433,
+      "mae": 1.9591032394996055,
+      "rows": 1560
+    },
+    {
+      "commodity": "Rice (medium grain)",
+      "mape": 2.848329756949119,
+      "mae": 2.5831989786732734,
+      "rows": 1592
+    },
+    {
+      "commodity": "Tomatoes",
+      "mape": 16.157531090624243,
+      "mae": 10.785603297990964,
+      "rows": 1613
+    },
+    {
+      "commodity": "Wheat flour",
+      "mape": 3.1124885079907822,
+      "mae": 2.637931567807741,
+      "rows": 1580
+    }
+  ]
+}
