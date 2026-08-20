@@ -31,11 +31,11 @@ DEMAND_FEATURE_COLS = demand_metrics["features"]
 COMMODITY_MAP = {
     "apples": 0, "bananas": 1, "beans_black": 2, "cabbage": 3,
     "carrots": 4, "chickpeas": 5, "eggs": 6, "fish": 7,
-    "lentils_broken": 8, "meat_chicken": 9, "milk": 10,
-    "oil_mustard": 11, "oil_soybean": 12, "oranges": 13,
-    "peanut": 14, "potatoes_red": 15, "pumpkin": 16,
-    "rice_coarse": 17, "rice_medium": 18, "tomatoes": 19,
-    "wheat_flour": 20,
+    "fuel_diesel": 8, "fuel_petrol": 9, "lentils_broken": 10,
+    "meat_chicken": 11, "milk": 12, "oil_mustard": 13,
+    "oil_soybean": 14, "oranges": 15, "peanut": 16,
+    "potatoes_red": 17, "pumpkin": 18, "rice_coarse": 19,
+    "rice_medium": 20, "tomatoes": 21, "wheat_flour": 22,
 }
 
 CATEGORY_MAP = {
@@ -55,6 +55,7 @@ COMMODITY_DISPLAY_MAP = {
     "apples": "Apples", "bananas": "Bananas", "beans_black": "Beans (black)",
     "cabbage": "Cabbage", "carrots": "Carrots", "chickpeas": "Chickpeas",
     "eggs": "Eggs", "fish": "Fish", "lentils_broken": "Lentils (broken)",
+    "fuel_diesel": "Fuel (diesel)", "fuel_petrol": "Fuel (petrol-gasoline)",
     "meat_chicken": "Meat (chicken)", "milk": "Milk",
     "oil_mustard": "Oil (mustard)", "oil_soybean": "Oil (soybean)",
     "oranges": "Oranges", "peanut": "Peanut", "potatoes_red": "Potatoes (red)",
@@ -506,6 +507,11 @@ def predict_batch(req: BatchPredictionRequest):
 @app.get("/model/info")
 def model_info():
     """Return model training metrics and feature list."""
+    feature_importance = sorted(
+        zip(FEATURE_COLS, model.feature_importances_),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:12]
     return {
         "accuracy_pct":    metrics["accuracy"],
         "mae_nrs":         metrics["mae"],
@@ -515,6 +521,20 @@ def model_info():
         "test_rows":       metrics["test_rows"],
         "features":        FEATURE_COLS,
         "top_commodities": metrics["per_commodity"][:5] if metrics.get("per_commodity") else [],
+        "feature_importance": [
+            {"feature": feature, "importance": round(float(importance), 4)}
+            for feature, importance in feature_importance
+        ],
+        "demand_model": {
+            "accuracy_pct": demand_metrics["accuracy"],
+            "mae_units": demand_metrics["mae"],
+            "rmse_units": demand_metrics["rmse"],
+            "r2_score": demand_metrics["r2"],
+            "mape_pct": demand_metrics["mape"],
+            "train_rows": demand_metrics["train_rows"],
+            "test_rows": demand_metrics["test_rows"],
+            "features": DEMAND_FEATURE_COLS,
+        },
     }
 
 @app.get("/prices/history/{commodity}")
