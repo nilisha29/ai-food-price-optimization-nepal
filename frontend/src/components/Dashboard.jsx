@@ -1,18 +1,30 @@
 import { useEffect, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
+import { API_BASE_URL } from "../config/api"
 
-const API = "http://localhost:8000"
-
-// Real 2024 prices from WFP Nepal dataset per commodity
+// Representative recent prices used to request the dashboard portfolio snapshot.
 const COMMODITY_DATA = [
+  { key: "apples",         label: "Apples",          p1: 180, p3: 172, p6: 165, p12: 155 },
+  { key: "bananas",        label: "Bananas",         p1: 120, p3: 115, p6: 108, p12: 100 },
+  { key: "beans_black",    label: "Beans (black)",   p1: 190, p3: 185, p6: 178, p12: 165 },
+  { key: "cabbage",        label: "Cabbage",         p1: 65,  p3: 60,  p6: 55,  p12: 50  },
+  { key: "carrots",        label: "Carrots",         p1: 110, p3: 105, p6: 98,  p12: 90  },
+  { key: "chickpeas",      label: "Chickpeas",       p1: 180, p3: 175, p6: 168, p12: 160 },
+  { key: "eggs",           label: "Eggs",            p1: 30,  p3: 28,  p6: 26,  p12: 25  },
+  { key: "fish",           label: "Fish",            p1: 480, p3: 465, p6: 450, p12: 430 },
+  { key: "lentils_broken", label: "Lentils Broken",  p1: 220, p3: 210, p6: 200, p12: 190 },
+  { key: "meat_chicken",   label: "Meat Chicken",    p1: 700, p3: 670, p6: 640, p12: 600 },
+  { key: "milk",           label: "Milk",            p1: 100, p3: 98,  p6: 95,  p12: 92  },
+  { key: "oil_mustard",    label: "Oil Mustard",     p1: 430, p3: 410, p6: 390, p12: 370 },
+  { key: "oil_soybean",    label: "Oil Soybean",     p1: 300, p3: 290, p6: 280, p12: 265 },
+  { key: "oranges",        label: "Oranges",         p1: 145, p3: 138, p6: 130, p12: 120 },
+  { key: "peanut",         label: "Peanut",          p1: 210, p3: 202, p6: 195, p12: 185 },
+  { key: "potatoes_red",   label: "Potatoes Red",    p1: 70,  p3: 65,  p6: 60,  p12: 55  },
+  { key: "pumpkin",        label: "Pumpkin",         p1: 85,  p3: 80,  p6: 75,  p12: 68  },
   { key: "rice_coarse",    label: "Rice Coarse",    p1: 100, p3: 95,  p6: 90,  p12: 85  },
+  { key: "rice_medium",    label: "Rice Medium",    p1: 115, p3: 110, p6: 104, p12: 98  },
+  { key: "tomatoes",       label: "Tomatoes",       p1: 95,  p3: 88,  p6: 80,  p12: 72  },
   { key: "wheat_flour",    label: "Wheat Flour",    p1: 100, p3: 95,  p6: 92,  p12: 88  },
-  { key: "lentils_broken", label: "Lentils Broken", p1: 220, p3: 210, p6: 200, p12: 190 },
-  { key: "oil_mustard",    label: "Oil Mustard",    p1: 430, p3: 410, p6: 390, p12: 370 },
-  { key: "potatoes_red",   label: "Potatoes Red",   p1: 70,  p3: 65,  p6: 60,  p12: 55  },
-  { key: "meat_chicken",   label: "Meat Chicken",   p1: 700, p3: 670, p6: 640, p12: 600 },
-  { key: "milk",           label: "Milk",           p1: 100, p3: 98,  p6: 95,  p12: 92  },
-  { key: "eggs",           label: "Eggs",           p1: 30,  p3: 28,  p6: 26,  p12: 25  },
 ]
 
 // Today's date dynamically
@@ -63,8 +75,6 @@ export default function Dashboard() {
   const [error, setError]             = useState(null)
 
   const todayDate    = getTodayDate()
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear  = new Date().getFullYear()
   const seasonLabel  = getCurrentSeason()
   
 
@@ -74,7 +84,7 @@ export default function Dashboard() {
       try {
         const results = await Promise.all(
           COMMODITY_DATA.map(c =>
-            fetch(`${API}/predict`, {
+            fetch(`${API_BASE_URL}/predict`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -93,18 +103,17 @@ export default function Dashboard() {
           )
         )
         setPredictions(results.filter(Boolean))
-      } catch (e) {
+      } catch {
         setError("Cannot connect to API. Make sure the backend is running on port 8000.")
       } finally {
         setLoading(false)
       }
     }
     fetchAll()
-  }, [])
+  }, [todayDate])
 
   const rising        = predictions.filter(p => p.price_change_pct > 0).length
   const falling       = predictions.filter(p => p.price_change_pct < 0).length
-  const festivalCount = predictions.filter(p => p.festival_season !== "Normal Season").length
 
   const chartData = predictions.map((p, i) => ({
     name:      COMMODITY_DATA[i]?.label || p.commodity,
@@ -124,7 +133,7 @@ export default function Dashboard() {
           Nepal Retail Pricing <span style={{ color: "var(--crimson)" }}>Intelligence</span>
         </h1>
         <p style={{ color: "var(--muted)", marginTop: "0.4rem", fontSize: "0.875rem" }}>
-          AI-driven price predictions for Nepal retail markets —{" "}
+          AI-driven food commodity price predictions for Nepal retail markets —{" "}
           <span style={{ color: "var(--accent)" }}>{seasonLabel}</span>
           {" "}· Predicting for {todayDate}
         </p>
@@ -156,10 +165,11 @@ export default function Dashboard() {
             <div style={{ height: 220, display: "flex", alignItems: "center",
               justifyContent: "center", color: "var(--muted)" }}>Loading predictions...</div>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={270}>
               <BarChart data={chartData} barCategoryGap="30%">
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(193,154,93,0.08)" />
-                <XAxis dataKey="name" tick={{ fill: "#8A7E72", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" interval={0} angle={-45} textAnchor="end" height={75}
+                  tick={{ fill: "#8A7E72", fontSize: 8 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "#8A7E72", fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="current"   fill="#8A7E72" name="Current"   radius={[3,3,0,0]} />
@@ -179,10 +189,11 @@ export default function Dashboard() {
             <div style={{ height: 220, display: "flex", alignItems: "center",
               justifyContent: "center", color: "var(--muted)" }}>Loading...</div>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={270}>
               <BarChart data={chartData} barCategoryGap="30%">
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(193,154,93,0.08)" />
-                <XAxis dataKey="name" tick={{ fill: "#8A7E72", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" interval={0} angle={-45} textAnchor="end" height={75}
+                  tick={{ fill: "#8A7E72", fontSize: 8 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "#8A7E72", fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip content={({ active, payload, label }) => active && payload?.length ? (
                   <div style={{ background: "var(--panel)", border: "1px solid var(--border)",

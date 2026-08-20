@@ -1,22 +1,6 @@
 import { useState } from "react"
-
-const API = "http://localhost:8000"
-
-const COMMODITIES = [
-  "rice_coarse","rice_medium","wheat_flour","lentils_broken",
-  "oil_mustard","oil_soybean","potatoes_red","tomatoes",
-  "meat_chicken","milk","eggs","fish","apples","bananas",
-  "chickpeas","beans_black","carrots","cabbage","pumpkin","peanut"
-]
-
-const PROVINCES = [
-  "bagmati","province_1","province_2","gandaki","lumbini","karnali","sudurpashchim"
-]
-
-const MARKETS = [
-  "kathmandu","bhaktapur","lalitpur","pokhara","chitwan",
-  "butwal","dharan","biratnagar","janakpur","nepalgunj"
-]
+import { API_BASE_URL } from "../config/api"
+import { FOOD_COMMODITIES, MARKETS, PROVINCES, displayCommodity } from "../config/catalog"
 
 const Field = ({ label, children }) => (
   <div style={{ marginBottom: "1.2rem" }}>
@@ -52,7 +36,7 @@ export default function Predict() {
   const predict = async () => {
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await fetch(`${API}/predict`, {
+      const res = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -107,9 +91,9 @@ export default function Predict() {
             <Field label="Commodity">
               <select value={form.commodity} onChange={e => set("commodity", e.target.value)}
                 style={selectStyle}>
-                {COMMODITIES.map(c => (
+                {FOOD_COMMODITIES.map(c => (
                   <option key={c} value={c} style={{ background: "var(--panel)" }}>
-                    {c.replace(/_/g, " ").replace(/\b\w/g, x => x.toUpperCase())}
+                    {displayCommodity(c)}
                   </option>
                 ))}
               </select>

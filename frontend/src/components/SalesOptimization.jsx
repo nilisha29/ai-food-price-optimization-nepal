@@ -1,14 +1,7 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts"
-
-const API = "http://localhost:8000"
-
-const COMMODITIES = [
-  "rice_coarse","rice_medium","wheat_flour","lentils_broken",
-  "oil_mustard","oil_soybean","potatoes_red","tomatoes",
-  "meat_chicken","milk","eggs","fish","apples","bananas",
-  "chickpeas","beans_black","carrots","cabbage","pumpkin","peanut"
-]
+import { API_BASE_URL } from "../config/api"
+import { FOOD_COMMODITIES, displayCommodity } from "../config/catalog"
 
 const inputStyle = {
   width: "100%", background: "var(--panel)", border: "1px solid var(--border)",
@@ -53,7 +46,7 @@ export default function SalesOptimization() {
   const optimize = async () => {
     setLoading(true); setError(null); setResult(null)
     try {
-      const res = await fetch(`${API}/sales/optimize`, {
+      const res = await fetch(`${API_BASE_URL}/sales/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -114,9 +107,9 @@ export default function SalesOptimization() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 1rem" }}>
             <Field label="Commodity">
               <select value={form.commodity} onChange={e => set("commodity", e.target.value)} style={selectStyle}>
-                {COMMODITIES.map(c => (
+                {FOOD_COMMODITIES.map(c => (
                   <option key={c} value={c} style={{ background: "var(--panel)" }}>
-                    {c.replace(/_/g, " ").replace(/\b\w/g, x => x.toUpperCase())}
+                    {displayCommodity(c)}
                   </option>
                 ))}
               </select>

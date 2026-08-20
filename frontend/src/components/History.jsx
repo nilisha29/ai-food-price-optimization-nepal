@@ -1,11 +1,22 @@
 import { useState, useEffect } from "react"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
+import { API_BASE_URL } from "../config/api"
+import { FOOD_COMMODITIES, displayCommodity } from "../config/catalog"
 
-const API = "http://localhost:8000"
-const COMMODITIES = [
-  "rice_coarse","wheat_flour","lentils_broken","oil_mustard",
-  "potatoes_red","meat_chicken","milk","eggs","tomatoes","chickpeas"
-]
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{ background: "var(--panel)", border: "1px solid var(--border)",
+      borderRadius: 4, padding: "0.6rem 1rem" }}>
+      <div style={{ color: "var(--muted)", fontSize: "0.75rem", marginBottom: 4 }}>
+        {label}
+      </div>
+      <div style={{ color: "var(--accent)", fontSize: "0.9rem", fontWeight: 600 }}>
+        NRs {payload[0].value?.toFixed(2)}
+      </div>
+    </div>
+  )
+}
 
 export default function History() {
   const [commodity, setCommodity] = useState("rice_coarse")
@@ -16,7 +27,7 @@ export default function History() {
   const fetchHistory = async (c) => {
     setLoading(true); setError(null)
     try {
-      const res = await fetch(`${API}/prices/history/${c}?limit=24`)
+      const res = await fetch(`${API_BASE_URL}/prices/history/${c}?limit=24`)
       if (!res.ok) throw new Error("API error")
       const json = await res.json()
       setData(json.history?.reverse() || [])
@@ -27,22 +38,10 @@ export default function History() {
     }
   }
 
-  useEffect(() => { fetchHistory(commodity) }, [commodity])
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload?.length) return null
-    return (
-      <div style={{ background: "var(--panel)", border: "1px solid var(--border)",
-        borderRadius: 4, padding: "0.6rem 1rem" }}>
-        <div style={{ color: "var(--muted)", fontSize: "0.75rem", marginBottom: 4 }}>
-          {label}
-        </div>
-        <div style={{ color: "var(--accent)", fontSize: "0.9rem", fontWeight: 600 }}>
-          NRs {payload[0].value?.toFixed(2)}
-        </div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    const loadHistory = async () => { await fetchHistory(commodity) }
+    loadHistory()
+  }, [commodity])
 
   const prices   = data.map(d => d.price_nrs)
   const minPrice = prices.length ? Math.min(...prices).toFixed(2) : "—"
@@ -69,7 +68,7 @@ export default function History() {
 
       {/* Commodity selector */}
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
-        {COMMODITIES.map(c => (
+        {FOOD_COMMODITIES.map(c => (
           <button key={c} onClick={() => setCommodity(c)} style={{
             padding: "0.4rem 1rem", borderRadius: 999,
             border: "1px solid",
@@ -79,7 +78,7 @@ export default function History() {
             fontSize: "0.8rem", cursor: "pointer", fontFamily: "inherit",
             transition: "all 0.15s",
           }}>
-            {c.replace(/_/g, " ").replace(/\b\w/g, x => x.toUpperCase())}
+            {displayCommodity(c)}
           </button>
         ))}
       </div>
