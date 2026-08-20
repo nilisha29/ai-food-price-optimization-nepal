@@ -27,6 +27,16 @@ inventory_df  = pd.read_csv("inventory_recommendations.csv")
 FEATURE_COLS = metrics["features"]
 DEMAND_FEATURE_COLS = demand_metrics["features"]
 
+
+def normalize_commodity_name(value: str) -> str:
+    return "".join(character.lower() for character in value if character.isalnum())
+
+
+COMMODITY_MAPE = {
+    normalize_commodity_name(item["commodity"]): item["mape"]
+    for item in metrics.get("per_commodity", [])
+}
+
 # ── Commodity & Province mappings (from training data) ────
 COMMODITY_MAP = {
     "apples": 0, "bananas": 1, "beans_black": 2, "cabbage": 3,
@@ -41,6 +51,18 @@ COMMODITY_MAP = {
 CATEGORY_MAP = {
     "cereals_tubers": 0, "pulses_legumes": 1, "vegetables": 2,
     "meat_fish": 3, "dairy_eggs": 4, "oils_fats": 5, "fruits": 6, "fuel": 7,
+}
+
+COMMODITY_CATEGORY_MAP = {
+    "apples": "fruits", "bananas": "fruits", "beans_black": "pulses_legumes",
+    "cabbage": "vegetables", "carrots": "vegetables", "chickpeas": "pulses_legumes",
+    "eggs": "dairy_eggs", "fish": "meat_fish", "fuel_diesel": "fuel",
+    "fuel_petrol": "fuel", "lentils_broken": "pulses_legumes",
+    "meat_chicken": "meat_fish", "milk": "dairy_eggs", "oil_mustard": "oils_fats",
+    "oil_soybean": "oils_fats", "oranges": "fruits", "peanut": "pulses_legumes",
+    "potatoes_red": "cereals_tubers", "pumpkin": "vegetables",
+    "rice_coarse": "cereals_tubers", "rice_medium": "cereals_tubers",
+    "tomatoes": "vegetables", "wheat_flour": "cereals_tubers",
 }
 
 PROVINCE_MAP = {
@@ -182,9 +204,10 @@ class SalesOptimizationRequest(BaseModel):
 # ── Helper Functions ───────────────────────────────────────
 
 def get_festival_season(month: int) -> str:
-    if month in [9, 10]:  return "Dashain Season"
-    if month in [10, 11]: return "Tihar Season"
-    if month in [8, 9]:   return "Teej Season"
+    if month == 10:        return "Dashain & Tihar Season"
+    if month == 9:         return "Dashain Season"
+    if month == 11:        return "Tihar Season"
+    if month == 8:         return "Teej Season"
     if month == 4:        return "New Year (Baisakh)"
     return "Normal Season"
 
@@ -231,7 +254,8 @@ def build_features(req: PricePredictionRequest) -> np.ndarray:
 
     # Commodity
     comm_code   = COMMODITY_MAP.get(req.commodity.lower(), 17)  # default rice
-    cat_code    = CATEGORY_MAP.get("cereals_tubers", 0)
+    category_key = COMMODITY_CATEGORY_MAP.get(req.commodity.lower(), "cereals_tubers")
+    cat_code    = CATEGORY_MAP[category_key]
 
     # Macro
     cpi_3m_change = ((req.food_cpi - 110) / 110 * 100) if req.food_cpi else 5.0
@@ -262,6 +286,15 @@ def make_recommendation(predicted: float, last_price: float,
         return f"PRICE DROP EXPECTED — Consider promotions or discounts to move current stock."
     else:
         return f"STABLE — Price relatively steady ({change_pct:+.1f}%). Normal restocking recommended."
+
+
+def get_prediction_confidence(commodity: str) -> str:
+    mape = COMMODITY_MAPE.get(normalize_commodity_name(commodity), metrics["mape"])
+    if mape <= 5:
+        return "High"
+    if mape <= 10:
+        return "Medium"
+    return "Low"
 
 def margin_suggestion(predicted: float, last_price: float) -> dict:
     cost_estimate = last_price * 0.72   # assume ~28% retail margin baseline
@@ -311,7 +344,8 @@ def build_demand_features(req: DemandPredictionRequest) -> np.ndarray:
     is_ktm    = int(req.market.lower() in KTM_VALLEY_MARKETS)
     prov_code = PROVINCE_MAP.get(req.province.lower(), 2)
     comm_code = COMMODITY_MAP.get(req.commodity.lower(), 17)
-    cat_code  = CATEGORY_MAP.get("cereals_tubers", 0)
+    category_key = COMMODITY_CATEGORY_MAP.get(req.commodity.lower(), "cereals_tubers")
+    cat_code  = CATEGORY_MAP[category_key]
 
     features = [
         year, month, quarter, week, doy, month_sin, month_cos,
@@ -474,7 +508,7 @@ def predict_price(req: PricePredictionRequest):
                       if req.prediction_date else datetime.now())
     festival       = get_festival_season(pred_date.month)
     change_pct     = round(((predicted - req.price_last_1m) / req.price_last_1m) * 100, 2)
-    confidence     = "High" if abs(change_pct) < 15 else "Medium"
+    confidence     = get_prediction_confidence(req.commodity)
     recommendation = make_recommendation(predicted, req.price_last_1m, festival)
     margin         = margin_suggestion(predicted, req.price_last_1m)
 
@@ -546,7 +580,11 @@ def price_history(commodity: str, market: str = "kathmandu", limit: int = 12):
         comm_code    = COMMODITY_MAP.get(commodity.lower())
         if comm_code is None:
             raise HTTPException(status_code=400, detail=f"Unknown commodity: {commodity}")
-        sub = (df[df["commodity_code"] == comm_code]
+        market_rows = df[
+            (df["commodity_code"] == comm_code)
+            & (df["market"].astype(str).str.lower() == market.lower())
+        ]
+        sub = (market_rows
                .sort_values("date", ascending=False)
                .head(limit * 5)
                .groupby("date")["price_nrs"]
@@ -664,10 +702,11 @@ def sales_optimize(req: SalesOptimizationRequest):
     )
     price_result = predict_price(price_req)
 
-    # 2. Demand prediction
+    # 2. Demand prediction at the recommended price
+    optimal_price = price_result["margin_suggestion"]["optimal_price"]
     demand_req = DemandPredictionRequest(
         commodity=req.commodity, market=req.market, province=req.province,
-        current_price=req.price_last_1m,
+        current_price=optimal_price,
         price_last_1m=req.price_last_1m, price_last_3m=req.price_last_3m,
         qty_last_1m=req.qty_last_1m, qty_last_3m=req.qty_last_3m, qty_last_12m=req.qty_last_12m,
         prediction_date=req.prediction_date,
@@ -686,7 +725,6 @@ def sales_optimize(req: SalesOptimizationRequest):
     promo_result = get_promotion_recommendation(promo_req)
 
     # 5. Combined revenue optimization summary
-    optimal_price = price_result["margin_suggestion"]["optimal_price"]
     predicted_qty = demand_result["predicted_qty_units"]
     projected_revenue = round(optimal_price * predicted_qty, 2)
     projected_cost    = round(price_result["margin_suggestion"]["estimated_cost"] * predicted_qty, 2)
