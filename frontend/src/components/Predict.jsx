@@ -133,6 +133,9 @@ export default function Predict() {
             color: "var(--muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
             Recent Price History (NRs/kg)
           </div>
+          <div style={{ color: "var(--muted)", fontSize: "0.75rem", lineHeight: 1.5, marginBottom: "1rem" }}>
+            Use the selected commodity's actual historical prices. Reusing the same history for every commodity will intentionally produce similar forecasts.
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 1rem" }}>
             {[

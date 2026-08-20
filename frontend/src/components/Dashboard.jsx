@@ -4,27 +4,27 @@ import { API_BASE_URL } from "../config/api"
 
 // Representative recent prices used to request the dashboard portfolio snapshot.
 const COMMODITY_DATA = [
-  { key: "apples",         label: "Apples",          p1: 180, p3: 172, p6: 165, p12: 155 },
-  { key: "bananas",        label: "Bananas",         p1: 120, p3: 115, p6: 108, p12: 100 },
-  { key: "beans_black",    label: "Beans (black)",   p1: 190, p3: 185, p6: 178, p12: 165 },
-  { key: "cabbage",        label: "Cabbage",         p1: 65,  p3: 60,  p6: 55,  p12: 50  },
-  { key: "carrots",        label: "Carrots",         p1: 110, p3: 105, p6: 98,  p12: 90  },
-  { key: "chickpeas",      label: "Chickpeas",       p1: 180, p3: 175, p6: 168, p12: 160 },
-  { key: "eggs",           label: "Eggs",            p1: 30,  p3: 28,  p6: 26,  p12: 25  },
-  { key: "fish",           label: "Fish",            p1: 480, p3: 465, p6: 450, p12: 430 },
-  { key: "lentils_broken", label: "Lentils Broken",  p1: 220, p3: 210, p6: 200, p12: 190 },
-  { key: "meat_chicken",   label: "Meat Chicken",    p1: 700, p3: 670, p6: 640, p12: 600 },
-  { key: "milk",           label: "Milk",            p1: 100, p3: 98,  p6: 95,  p12: 92  },
-  { key: "oil_mustard",    label: "Oil Mustard",     p1: 430, p3: 410, p6: 390, p12: 370 },
-  { key: "oil_soybean",    label: "Oil Soybean",     p1: 300, p3: 290, p6: 280, p12: 265 },
-  { key: "oranges",        label: "Oranges",         p1: 145, p3: 138, p6: 130, p12: 120 },
-  { key: "peanut",         label: "Peanut",          p1: 210, p3: 202, p6: 195, p12: 185 },
-  { key: "potatoes_red",   label: "Potatoes Red",    p1: 70,  p3: 65,  p6: 60,  p12: 55  },
-  { key: "pumpkin",        label: "Pumpkin",         p1: 85,  p3: 80,  p6: 75,  p12: 68  },
-  { key: "rice_coarse",    label: "Rice Coarse",    p1: 100, p3: 95,  p6: 90,  p12: 85  },
-  { key: "rice_medium",    label: "Rice Medium",    p1: 115, p3: 110, p6: 104, p12: 98  },
-  { key: "tomatoes",       label: "Tomatoes",       p1: 95,  p3: 88,  p6: 80,  p12: 72  },
-  { key: "wheat_flour",    label: "Wheat Flour",    p1: 100, p3: 95,  p6: 92,  p12: 88  },
+  { key: "apples",         label: "Apples",          p1: 180, p3: 172, p6: 165, p12: 155, stock: 145, days: 8 },
+  { key: "bananas",        label: "Bananas",         p1: 120, p3: 115, p6: 108, p12: 100, stock: 35,  days: 3 },
+  { key: "beans_black",    label: "Beans (black)",   p1: 190, p3: 185, p6: 178, p12: 165, stock: 45,  days: 12 },
+  { key: "cabbage",        label: "Cabbage",         p1: 65,  p3: 60,  p6: 55,  p12: 50,  stock: 280, days: 7 },
+  { key: "carrots",        label: "Carrots",         p1: 110, p3: 105, p6: 98,  p12: 90,  stock: 12,  days: 4 },
+  { key: "chickpeas",      label: "Chickpeas",       p1: 180, p3: 175, p6: 168, p12: 160, stock: 60,  days: 15 },
+  { key: "eggs",           label: "Eggs",            p1: 30,  p3: 28,  p6: 26,  p12: 25,  stock: 90,  days: 6 },
+  { key: "fish",           label: "Fish",            p1: 480, p3: 465, p6: 450, p12: 430, stock: 75,  days: 9 },
+  { key: "lentils_broken", label: "Lentils Broken",  p1: 220, p3: 210, p6: 200, p12: 190, stock: 40,  days: 14 },
+  { key: "meat_chicken",   label: "Meat Chicken",    p1: 700, p3: 670, p6: 640, p12: 600, stock: 55,  days: 4 },
+  { key: "milk",           label: "Milk",            p1: 100, p3: 98,  p6: 95,  p12: 92,  stock: 40,  days: 3 },
+  { key: "oil_mustard",    label: "Oil Mustard",     p1: 430, p3: 410, p6: 390, p12: 370, stock: 80,  days: 20 },
+  { key: "oil_soybean",    label: "Oil Soybean",     p1: 300, p3: 290, p6: 280, p12: 265, stock: 35,  days: 10 },
+  { key: "oranges",        label: "Oranges",         p1: 145, p3: 138, p6: 130, p12: 120, stock: 150, days: 8 },
+  { key: "peanut",         label: "Peanut",          p1: 210, p3: 202, p6: 195, p12: 185, stock: 25,  days: 18 },
+  { key: "potatoes_red",   label: "Potatoes Red",    p1: 70,  p3: 65,  p6: 60,  p12: 55,  stock: 120, days: 12 },
+  { key: "pumpkin",        label: "Pumpkin",         p1: 85,  p3: 80,  p6: 75,  p12: 68,  stock: 180, days: 10 },
+  { key: "rice_coarse",    label: "Rice Coarse",    p1: 100, p3: 95,  p6: 90,  p12: 85,  stock: 220, days: 18 },
+  { key: "rice_medium",    label: "Rice Medium",    p1: 115, p3: 110, p6: 104, p12: 98,  stock: 70,  days: 16 },
+  { key: "tomatoes",       label: "Tomatoes",       p1: 95,  p3: 88,  p6: 80,  p12: 72,  stock: 320, days: 8 },
+  { key: "wheat_flour",    label: "Wheat Flour",    p1: 100, p3: 95,  p6: 92,  p12: 88,  stock: 160, days: 20 },
 ]
 
 // Today's date dynamically
@@ -40,6 +40,30 @@ const getCurrentSeason = () => {
   if ([6,7,8].includes(m)) return "Monsoon Season"
   if ([12,1,2].includes(m)) return "Winter Season"
   return "Normal Season"
+}
+
+const getActionableRecommendation = result => {
+  const promotion = result.promotion
+  const inventory = result.inventory_status
+  const price = result.price_forecast
+  const demand = result.demand_forecast
+
+  if (promotion?.urgency === "high") {
+    return `PROMOTION — ${promotion.suggested_discount_pct}% discount recommended`
+  }
+  if (inventory?.status === "CRITICAL" || inventory?.status === "REORDER") {
+    return `REORDER — ${inventory.status.toLowerCase()} stock level`
+  }
+  if (price.price_change_pct > 3) {
+    return `RESTOCK — price may rise ${price.price_change_pct.toFixed(1)}%`
+  }
+  if (demand.qty_change_pct < -5) {
+    return `WATCH DEMAND — forecast down ${Math.abs(demand.qty_change_pct).toFixed(1)}%`
+  }
+  if (price.price_change_pct < -3) {
+    return `REVIEW PRICE — expected to fall ${Math.abs(price.price_change_pct).toFixed(1)}%`
+  }
+  return "HOLD — price and stock are currently stable"
 }
 
 const StatCard = ({ label, value, sub, color = "var(--accent)" }) => (
@@ -84,7 +108,7 @@ export default function Dashboard() {
       try {
         const results = await Promise.all(
           COMMODITY_DATA.map(c =>
-            fetch(`${API_BASE_URL}/predict`, {
+            fetch(`${API_BASE_URL}/sales/optimize`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -95,11 +119,26 @@ export default function Dashboard() {
                 price_last_3m:   c.p3,
                 price_last_6m:   c.p6,
                 price_last_12m:  c.p12,
+                qty_last_1m:     220,
+                qty_last_3m:     210,
+                qty_last_12m:    200,
+                current_stock:   c.stock,
+                days_in_stock:   c.days,
                 prediction_date: todayDate,   // ← today's real date
                 food_cpi:        125,
                 nrb_food_cpi_change: 5.2,
               }),
-            }).then(r => r.json()).catch(() => null)
+            }).then(async response => {
+              if (!response.ok) return null
+              const result = await response.json()
+              return {
+                ...result.price_forecast,
+                recommendation: getActionableRecommendation(result),
+                demand_forecast: result.demand_forecast,
+                inventory_status: result.inventory_status,
+                promotion: result.promotion,
+              }
+            }).catch(() => null)
           )
         )
         setPredictions(results.filter(Boolean))
